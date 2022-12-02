@@ -1,0 +1,146 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 02 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	input = input.trim();
+
+	input = input.split("\n");
+
+	input = input.map(function(val){
+		return val.split(' ');
+	});
+
+	return input;
+}
+
+function answer1( input ) {
+
+	var totalScore = 0;
+
+	for( round of input ) {
+
+		var elf = round[0],
+			me = round[1];
+
+		// A - rock
+		// B - paper
+		// C = scissors
+
+		// X - rock
+		// Y - paper
+		// Z - scissors
+
+		var roundScore = 0;
+		if( me == 'X' ) roundScore += 1;
+		else if( me == 'Y' ) roundScore += 2;
+		else if( me == 'Z' ) roundScore += 3;
+
+		if( elf == 'A' ) {
+			if( me == 'X' ) roundScore += 3;
+			else if( me == 'Y' ) roundScore += 6;
+			else if( me == 'C' ) roundScore += 0;
+		} else if( elf == 'B' ) {
+			if( me == 'X' ) roundScore += 0;
+			else if( me == 'Y' ) roundScore += 3;
+			else if( me == 'Z' ) roundScore += 6;
+		} else if( elf == 'C' ) {
+			if( me == 'X' ) roundScore += 6;
+			else if( me == 'Y' ) roundScore += 0;
+			else if( me == 'Z' ) roundScore += 3;
+		}
+
+		totalScore += roundScore;
+
+	}
+
+	return totalScore;
+}
+
+function answer2( input ) {
+
+	var totalScore = 0;
+
+	for( round of input ) {
+
+		var elf = round[0],
+			target = round[1];
+
+		// A - rock
+		// B - paper
+		// C = scissors
+
+		// X - lose
+		// Y - draw
+		// Z - win
+
+		var roundScore = 0;
+
+		var me;
+
+		if( target == 'X' ) { // lose
+			if( elf == 'A' ) me = 'C';
+			else if( elf == 'B' ) me = 'A';
+			else if( elf == 'C' ) me = 'B';
+		} else if( target == 'Y' ) { // draw
+			if( elf == 'A' ) me = 'A';
+			else if( elf == 'B' ) me = 'B';
+			else if( elf == 'C' ) me = 'C';
+		} else if( target == 'Z' ) { // win
+			if( elf == 'A' ) me = 'B';
+			else if( elf == 'B' ) me = 'C';
+			else if( elf == 'C' ) me = 'A';
+		}
+
+		if( me == 'A' ) roundScore += 1;
+		else if( me == 'B' ) roundScore += 2;
+		else if( me == 'C' ) roundScore += 3;
+
+		if( target == 'X' ) roundScore += 0;
+		else if( target == 'Y' ) roundScore += 3;
+		else if( target == 'Z' ) roundScore += 6;
+
+		totalScore += roundScore;
+
+	}
+
+	return totalScore;
+}
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
