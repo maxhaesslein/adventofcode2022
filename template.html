@@ -20,6 +20,8 @@ function getInput() {
 	var textArea = document.getElementById('input');
 	var input = textArea.value;
 
+	input = input.trim();
+
 	if( ! input ) console.warn("please provide an input");
 
 	return input;
