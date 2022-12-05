@@ -1,0 +1,202 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 05 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	input = input.split('\n\n');
+
+	var moves = input[1].split('\n').map(function(el){
+		var move = el.split(' ');
+
+		move.splice(0, 1); // remove 'move'
+		move.splice(1, 1); // remove 'from'
+		move.splice(2, 1); // remove 'to'
+
+		move = move.map(function(el){return parseInt(el,10);});
+
+		return move;
+	});
+
+	var stacks = input[0].split("\n").reverse();
+
+	stacks.splice(0,1); // remove numbers
+
+	// omg, soooo hacky
+	var cleanStacks = [];
+	for( var horStack of stacks ) {
+
+		var j = 0,
+			newHorStack = '';
+		while( j < horStack.length ) {
+
+			if( j%4 == 3 ) {
+				newHorStack += '/';
+			} else {
+				newHorStack += horStack[j];
+			}
+
+			j++;
+		}
+		horStack = newHorStack;
+
+		horStack = horStack.split('/');
+
+		var i = 0;
+		for( var crate of horStack ) {
+			if( ! cleanStacks[i] ) cleanStacks[i] = [];
+
+			if( crate.trim() ) {
+				crate = crate.replace('[','').replace(']','');
+				cleanStacks[i].push(crate);
+			}
+
+			i++;
+		}
+
+	}
+
+	var output = {
+		stacks: cleanStacks,
+		moves: moves
+	};
+
+	return output;
+}
+
+function answer1( input ) {
+
+	var stacks = Array.from(input.stacks),
+		moves = Array.from(input.moves);
+
+	for( var move of moves ) {
+
+		var numberOfCrates = move[0],
+			from = move[1],
+			to = move[2];
+
+		// our stacks are 0-indexed, so ..
+		from--;
+		to--;
+
+		if( numberOfCrates <= 0 ) {
+			console.warn('numberOfCrates is too low', numberOfCrates);
+			continue;
+		}
+
+		while( numberOfCrates > 0 ) {
+			numberOfCrates--;
+
+			var crate = stacks[from].pop();
+
+			if( ! crate ) {
+				console.warn( 'no crate', crate );
+				continue;
+			}
+
+			stacks[to].push(crate);
+
+		}
+
+	}
+
+	var returnString = '';
+	for( var stack of stacks ) {
+		returnString += stack[stack.length-1];
+	}
+
+	return returnString;
+}
+
+function answer2( input ) {
+
+	var stacks = Array.from(input.stacks),
+		moves = Array.from(input.moves);
+
+	for( var move of moves ) {
+
+		var numberOfCrates = move[0],
+			from = move[1],
+			to = move[2];
+
+		// our stacks are 0-indexed, so ..
+		from--;
+		to--;
+
+		if( numberOfCrates <= 0 ) {
+			console.warn('numberOfCrates is too low', numberOfCrates);
+			continue;
+		}
+
+		var crates = [];
+		while( numberOfCrates > 0 ) {
+			numberOfCrates--;
+
+			var crate = stacks[from].pop();
+
+			if( ! crate ) {
+				console.warn( 'no crate', crate );
+				continue;
+			}
+
+			crates.push(crate);
+
+		}
+
+		if( ! crates.length ) {
+			console.warn( 'crates are empty', crates, move)
+			continue;
+		}
+		crates.reverse();
+
+		Array.prototype.push.apply( stacks[to], crates );
+
+	}
+
+	var returnString = '';
+	for( var stack of stacks ) {
+		returnString += stack[stack.length-1];
+	}
+
+	return returnString;
+}
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	//input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		var input = prepareInput(getInput());
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
