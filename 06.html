@@ -1,0 +1,98 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 06 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	input = input.split("");
+
+	return input;
+}
+
+function answer1( input ) {
+
+	var position = getPosition( input, 4 );
+
+	return position;
+}
+
+function answer2( input ) {
+	
+	var position = getPosition( input, 14 );
+
+	return position;
+}
+
+
+function getPosition( input, distinctChars ) {
+
+	var position = 0;
+
+	var lastXLetters = [];
+
+	for( var letter of input ) {
+		
+		position++;
+
+		// very, very hacky. again.
+		if( lastXLetters.indexOf(letter) < 0 && position > distinctChars ) {
+			// letter is not in lastXLetters; lets check if there are any other duplicates:
+			var duplicatesFound = true;
+			for( testLetter of lastXLetters ) {
+				var foundNumber = 0;
+				for( testLetter2 of lastXLetters ) {
+					if( testLetter2 == testLetter ) foundNumber++;
+				}
+				if( foundNumber > 1 ) duplicatesFound = false;
+			}
+
+			if( duplicatesFound ) break;
+		}
+
+		lastXLetters.push(letter);
+	
+		if( position >= distinctChars ) lastXLetters.shift();
+
+	}
+
+	return position;
+}
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
