@@ -1,0 +1,203 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 07 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	input = input.split("\n");
+
+	var activeDir = ['/'],
+		tree = { '/': {
+			'_type': 'dir',
+			'_size': 0
+		}};
+
+	for( var line of input ) {
+		if( line.startsWith('$') ) {
+			// command:
+
+			var command = line.split(' ');
+			if( command[1] == 'ls' ) {
+				// the following lines list the content, so we just continue with the next line
+			} else if( command[1] == 'cd' ) {
+				// change dir
+				if( command[2] == '/' ) {
+					activeDir = ['/'];
+				} else if( command[2] == '..' ) {
+					activeDir.pop();
+				} else {
+					activeDir.push( command[2] );
+				}
+			}
+		} else {
+			// dir or file listing:
+
+			// switch into current folder:
+			var currentTree = tree,
+				activeDirClone = Array.from(activeDir);
+			while( activeDirClone.length ) {
+				var dir = activeDirClone.shift();
+				currentTree = currentTree[dir];
+			}
+
+			var entry = line.split(' ');
+			if( entry[0] == 'dir' ) {
+				// create new dir
+				currentTree[entry[1]] = {
+					'_type':'dir',
+					'_size': 0
+				};
+			} else {
+				// create new file
+				var size = parseInt(entry[0]),
+					name = entry[1];
+				currentTree[name] = {
+					'_type': 'file',
+					'_size': size
+				};
+
+				// add filesize to this and all the parent directories:
+				var currentTreeParent = tree,
+					activeDirCloneParent = Array.from(activeDir);
+				while( activeDirCloneParent.length ) {
+					var dir = activeDirCloneParent.shift();
+					currentTreeParent = currentTreeParent[dir];
+					currentTreeParent['_size'] += size;
+				}
+
+			}
+
+		}
+	}
+
+	return tree;
+}
+
+function answer1( tree ) {
+
+	var directoryMaxFilesize = 100000;
+
+	var filesizeSum = traverseTree1( tree, ['/'], directoryMaxFilesize );
+
+	return filesizeSum;
+}
+
+function answer2( tree ) {
+
+	var diskSpace = 70000000,
+		unusedSpaceRequired = 30000000,
+		currentUnusedSpace = diskSpace - getFolderSize(tree['/']),
+		needToDelete = unusedSpaceRequired - currentUnusedSpace;
+
+	var possibleDirectorySizes = traverseTree2( [], tree, ['/'], needToDelete );
+
+	var smallestDirectorySize = diskSpace;
+	for( var possibleDirectorySize of possibleDirectorySizes ) {
+		if( possibleDirectorySize < smallestDirectorySize ) smallestDirectorySize = possibleDirectorySize;
+	}
+
+	return smallestDirectorySize;
+}
+
+
+function traverseTree1( tree, subFolders, directoryMaxFilesize ) {
+
+	var filesizeSum = 0;
+
+	for( var subFolder of subFolders ) {
+
+		var currentTree = tree[subFolder];
+
+		var subFolders = getSubFolders(currentTree),
+			size = getFolderSize(currentTree);
+
+		if( size < directoryMaxFilesize ) {
+			filesizeSum += size;
+		}
+
+		filesizeSum += traverseTree1( currentTree, subFolders, directoryMaxFilesize );
+
+	}
+
+	return filesizeSum;
+}
+
+function traverseTree2( possibleDirectorySizes, tree, subFolders, needToDelete ) {
+
+	for( var subFolder of subFolders ) {
+
+		var currentTree = tree[subFolder];
+
+		var subFolders = getSubFolders(currentTree),
+			size = getFolderSize(currentTree);
+
+		if( size > needToDelete ) {
+			possibleDirectorySizes.push(size);
+		}
+
+		possibleDirectorySizes = traverseTree2( possibleDirectorySizes, currentTree, subFolders, needToDelete );
+
+	}
+
+	return possibleDirectorySizes;
+}
+
+function getSubFolders( tree ) {
+
+	var subFolders = [];
+
+	Object.keys(tree).forEach(function(item){
+		if( item == '_type' || item == '_size' ) return;
+
+		var content = tree[item];
+
+		if( content['_type'] == 'file' ) return;
+
+		subFolders.push(item);
+	})
+
+	return subFolders;
+}
+
+function getFolderSize( tree ) {
+	return tree['_size'];
+}
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
