@@ -93,7 +93,13 @@ function drawBuffer( cycle, x ) {
 	x += 1; // buffer is zero-indexed
 	cycle %= 40; // every line of the buffer starts at 0 and the buffer width is 40
 
-	if( cycle > x-2 && cycle < x+2 ) {
+	var leftCheck = x-2,
+		rightCheck = x+2;
+
+	if( leftCheck < 0 ) leftCheck = 0;
+	if( rightCheck > 40 ) rightCheck = 40;
+
+	if( cycle > leftCheck && cycle < rightCheck ) {
 		symbol = '#';
 	}
 
