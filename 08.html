@@ -1,0 +1,184 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 08 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	input = input.split('\n');
+
+	input = input.map(function(el){
+		return el.split('');
+	});
+
+	return input;
+}
+
+function answer1( forest ) {
+
+	var height = forest.length,
+		width = forest[0].length;
+
+	var outsideTrees = width*2 + height*2 - 4;
+
+	var visibleTreeCount = 0;
+
+	// we start at y = 1 & x = 1 because we skip the outside trees
+	for( var y = 1; y < height-1; y++ ) {
+		for( var x = 1; x < width-1; x++ ) {
+
+			var tree = forest[y][x];
+
+			var checkX, checkY;
+
+			// check trees to the left
+			var visibleLeft = true;
+			checkY = y;
+			for( checkX = x-1; checkX >= 0; checkX-- ) {
+				if( forest[checkY][checkX] >= tree ) {
+					visibleLeft = false;
+					break;
+				}
+			}
+
+			// check trees to the right
+			var visibleRight = true;
+			checkY = y;
+			for( checkX = x+1; checkX < width; checkX++ ) {
+				if( forest[checkY][checkX] >= tree ) {
+					visibleRight = false;
+					break;
+				}
+			}
+
+			// check trees to the top
+			var visibleTop = true;
+			checkX = x;
+			for( checkY = y-1; checkY >= 0; checkY-- ) {
+				if( forest[checkY][checkX] >= tree ) {
+					visibleTop = false;
+					break;
+				}
+			}
+
+			// check trees to the bottom
+			var visibleBottom = true;
+			checkX = x;
+			for( checkY = y+1; checkY < height; checkY++ ) {
+				if( forest[checkY][checkX] >= tree ) {
+					visibleBottom = false;
+					break;
+				}
+			}
+
+			if( visibleLeft || visibleRight || visibleTop || visibleBottom ) visibleTreeCount++;
+
+		}
+	}
+
+	return outsideTrees+visibleTreeCount;
+}
+
+function answer2( forest ) {
+
+	var highestScenicScore = 0;
+
+	var height = forest.length,
+		width = forest[0].length;
+
+	for( var y = 0; y < height; y++ ) {
+		for( var x = 0; x < width; x++ ) {
+
+			var tree = forest[y][x];
+
+			var scenicScore = 0;
+
+			var checkX, checkY;
+
+			// check trees to the left
+			var scoreLeft = 0;
+			checkY = y;
+			for( checkX = x-1; checkX >= 0; checkX-- ) {
+				scoreLeft++;
+				if( forest[checkY][checkX] >= tree ) {
+					break;
+				}
+			}
+
+			// check trees to the right
+			var scoreRight = 0;
+			checkY = y;
+			for( checkX = x+1; checkX < width; checkX++ ) {
+				scoreRight++;
+				if( forest[checkY][checkX] >= tree ) {
+					break;
+				}
+			}
+
+			// check trees to the top
+			var scoreTop = 0;
+			checkX = x;
+			for( checkY = y-1; checkY >= 0; checkY-- ) {
+				scoreTop++;
+				if( forest[checkY][checkX] >= tree ) {
+					break;
+				}
+			}
+
+			// check trees to the bottom
+			var scoreBottom = 0;
+			checkX = x;
+			for( checkY = y+1; checkY < height; checkY++ ) {
+				scoreBottom++;
+				if( forest[checkY][checkX] >= tree ) {
+					break;
+				}
+			}
+
+			var scenicScore = scoreLeft * scoreRight * scoreTop * scoreBottom;
+
+			if( scenicScore > highestScenicScore ) highestScenicScore = scenicScore;
+
+		}
+	}
+
+	return highestScenicScore;
+}
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
