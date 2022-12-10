@@ -1,0 +1,142 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 10 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	input = input.split("\n");
+
+	return input;
+}
+
+function answer1( input ) {
+
+	var x = 1,
+		cycle = 0,
+		signalStrengthSum = 0;
+
+	for( var command of input ) {
+
+		var number = 0;
+
+		if ( command == "noop" ) {
+
+			cycle++;
+			signalStrengthSum += checkCycle( cycle, x );
+
+		} else {
+
+			command = command.split(" ");
+
+			for( var cyclesToComplete = 2; cyclesToComplete > 0; cyclesToComplete-- ) {
+				cycle++;
+				signalStrengthSum += checkCycle( cycle, x );
+			}
+
+			number = parseInt( command[1], 10 );
+
+		}
+
+		x += number;
+
+	}
+
+	return signalStrengthSum;
+}
+
+function answer2( input ) {
+
+	var x = 1,
+		cycle = 0,
+		buffer = "\n";
+
+	for( var command of input ) {
+
+		var number = 0;
+
+		if ( command == "noop" ) {
+
+			cycle++;
+			buffer += drawBuffer( cycle, x );
+
+		} else {
+
+			command = command.split(" ");
+
+			for( var cyclesToComplete = 2; cyclesToComplete > 0; cyclesToComplete-- ) {
+				cycle++;
+				buffer += drawBuffer( cycle, x );
+			}
+
+			number = parseInt( command[1], 10 );
+
+		}
+
+		x += number;
+
+	}
+
+	return buffer;
+}
+
+
+function checkCycle( cycle, x ) {
+	if( (cycle-20)%40 == 0 ) {
+		return cycle*x;
+	}
+	return 0;
+}
+
+function drawBuffer( cycle, x ) {
+	var symbol = ".";
+
+	x += 1; // buffer is zero-indexed
+	cycle %= 40; // every line of the buffer starts at 0 and the buffer width is 40
+
+	if( cycle > x-2 && cycle < x+2 ) {
+		symbol = '#';
+	}
+
+	if( cycle == 0 ) symbol += "\n";
+
+	return symbol;
+}
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
