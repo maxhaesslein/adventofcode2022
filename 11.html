@@ -53,12 +53,16 @@ function answer1( monkeys ) {
 }
 
 function answer2( monkeys ) {
-	return '??';
-	//return makeMonkeyBusiness( monkeys, 10000 );
+	// did not get part 2. had to look up the trick to it on the AoC reddit
+	// I still can't fully wrap my head around how this works ..
+	var mod = monkeys.reduce( function(value, monkey){
+		return value * monkey.test;
+	}, 1 );
+	return makeMonkeyBusiness( monkeys, 10000, false, mod );
 }
 
 
-function makeMonkeyBusiness( monkeys, numberOfRounds, reliefLevel = false ) {
+function makeMonkeyBusiness( monkeys, numberOfRounds, reliefLevel = false, mod = false ) {
 	
 	var numberOfInspections = [];
 
@@ -69,6 +73,8 @@ function makeMonkeyBusiness( monkeys, numberOfRounds, reliefLevel = false ) {
 
 			var item;
 			while( item = monkey.items.pop() ) {
+
+				if( mod ) item %= mod;
 
 				// inspect
 
@@ -130,6 +136,7 @@ window.addEventListener('load',function(){
 	document.getElementById('start').addEventListener('click', function(){
 		var input = prepareInput(getInput());
 		output.innerHTML = "Answer 1: "+answer1(input);
+		input = prepareInput(getInput()); // just get the clean input again
 		output.innerHTML += "\nAnswer 2: "+answer2(input);
 	});
 });
