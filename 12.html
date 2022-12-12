@@ -1,0 +1,227 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 12 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+// so we meet again, Dijkstra! Let's see what code I wrote last year ... *copy&paste*
+
+
+function prepareInput( input ) {
+
+	var map = input.split('\n').map( function(line){
+		return line.split('').map(function(value) {
+			if( value === value.toUpperCase() ) return value; // let S and E be ..
+			return parseInt(value, 36)-10; // map a -> 0, b -> 1 ... z -> 25
+		});
+	});
+
+	var start, end;
+	for( var y = 0; y < map.length; y++ ) {
+		for( var x = 0; x < map[y].length; x++ ) {
+
+			if( map[y][x] == 'S' ) {
+				start = [x,y];
+				map[y][x] = 0;
+			}
+			if( map[y][x] == 'E' ) {
+				end = [x,y];
+				map[y][x] = 25;
+			}
+
+			if( start !== undefined && end != undefined ) break;
+		}
+		if( start !== undefined && end != undefined ) break;
+	}
+
+	return {
+		start: start,
+		end: end,
+		map: map
+	};
+}
+
+function answer1( input ) {
+	var map = input['map'],
+		start = input['start'],
+		end = input['end'].join(',');
+
+	var allCosts = getAllCosts( map, start );
+
+	return allCosts[end];
+}
+
+function answer2( input ) {
+
+	// here, we start at the end point ..
+	var map = input['map'],
+		start = input['end'];
+
+	// and use the lowest values as end points
+	var possibleEndPoints = [];
+	for( var y = 0; y < map.length; y++ ) {
+		for( var x = 0; x < map[y].length; x++ ) {
+			if( map[y][x] === 0 ) possibleEndPoints.push(x+','+y);
+		}
+	}
+
+	// but for the traversing to work correctly, we need to inverse all the field heights (a = 25, z = 0)
+	map = map.map(function(column){
+		return column.map(function(val){
+			return 25-val;
+		})
+	});
+
+	var allCosts = getAllCosts( map, start, false, true );
+
+	var lowestCost = Infinity;
+	for( var possibleEndPoint of possibleEndPoints ) {
+		if( allCosts[possibleEndPoint] < lowestCost ) lowestCost = allCosts[possibleEndPoint];
+	}
+
+	return lowestCost;
+}
+
+
+function getAllCosts( map, start ){
+
+	var height = map.length,
+		width = map[0].length;
+
+	var processedNodes = [],
+		priorityCosts = [],
+		trackedCosts = {};
+
+	
+	// add all neighbors that are possible:
+	var possibleDirections = getNodeChildren( map, start.join(','), processedNodes, width, height );
+	Object.keys(possibleDirections).forEach(function(node){
+		addNodeCost( priorityCosts, trackedCosts, node );
+		processedNodes.push( node );
+	});
+
+	var node = getLowestCostNodePosition( priorityCosts );
+	while( node ) {
+		var costToReachNode = trackedCosts[node];
+
+		var childrenOfNode = getNodeChildren( map, node, processedNodes, width, height );
+		for( var child in childrenOfNode ) {
+			var costFromNodeToChild = childrenOfNode[child],
+				costToChild = costToReachNode + costFromNodeToChild;
+
+			if( ! trackedCosts[child] || trackedCosts[child] > costToChild ) {
+				addNodeCost( priorityCosts, trackedCosts, child, costToChild );
+			}
+		}
+
+		processedNodes.push( node );
+
+		node = getLowestCostNodePosition( priorityCosts );
+	}
+
+	return trackedCosts;
+}
+
+function getNodeChildren( map, node, processedNodes, width, height ) {
+	var children = {},
+		mapPosition = node.split(','),
+		currentX = parseInt(mapPosition[0],10),
+		currentY = parseInt(mapPosition[1],10),
+		nodeString;
+
+	var currentValue = map[currentY][currentX];
+
+	// left
+	nodeString = (currentX-1)+","+currentY;
+	if( currentX - 1 >= 0 && processedNodes.indexOf(nodeString) === -1 ) {
+		if( currentValue > map[currentY][currentX-1]-2 ) {
+			children[nodeString] = 1;
+		}
+	}
+
+	// right
+	nodeString = (currentX+1)+","+currentY;
+	if( currentX + 1 < width && processedNodes.indexOf(nodeString) === -1 ) {
+		if( currentValue > map[currentY][currentX+1]-2 ) {
+			children[nodeString] = 1;
+		}
+	}
+
+	// top
+	nodeString = currentX+","+(currentY-1);
+	if( currentY - 1 >= 0 && processedNodes.indexOf(nodeString) === -1 ) {
+		if( currentValue > map[currentY-1][currentX]-2 ) {
+			children[nodeString] = 1;
+		}
+	}
+
+	// bottom
+	nodeString = currentX+","+(currentY+1);
+	if( currentY + 1 < height && processedNodes.indexOf(nodeString) === -1 ) {
+		if( currentValue > map[currentY+1][currentX]-2 ) {
+			children[nodeString] = 1;
+		}
+	}
+
+	return children;
+}
+
+function addNodeCost( priorityCosts, trackedCosts, position, cost = 1 ) {
+
+	trackedCosts[position] = cost;
+
+	for( var i = 0; i < priorityCosts.length; i++ ) {
+		if( priorityCosts[i].cost < cost ) continue;
+		break;
+	}
+
+	priorityCosts.splice( i, 0, {
+		cost: cost,
+		position: position
+	} );
+}
+
+function getLowestCostNodePosition( costs ) {
+	var node = costs.shift();
+	if( node ) return node.position;
+}
+
+
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		input = prepareInput(getInput()); // just get a clean input again ..
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
