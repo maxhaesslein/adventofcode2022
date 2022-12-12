@@ -12,3 +12,4 @@ my solutions in JavaScript for [Advent of Code](https://adventofcode.com/) 2022
 - Day 09: ~ 46 min
 - Day 10: ~ 27 min
 - Day 11: ~ 38 min (p1) + 30 min (p2, with looking up the trick)
+- Day 12: ~ 91 min (with code from last year)
