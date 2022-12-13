@@ -1,0 +1,172 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 13 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	var pairs = input.split('\n\n').map(function(packets){
+		return packets.split('\n').map(function(packet){
+			return JSON.parse(packet); // hooray for json
+		});
+	});
+
+	return pairs;
+}
+
+function answer1( pairs ) {
+
+	var rightOrderPairsIndices = [];
+
+	for( var index = 1; index <= pairs.length; index++ ) {
+
+		var pair = pairs[index-1];
+
+		var left = pair[0],
+			right = pair[1];
+
+		var inOrder = comparePackets(left, right);
+
+
+		if( inOrder ) {
+			rightOrderPairsIndices.push(index);
+		}
+
+	}
+
+	var sum = 0;
+	for( var pair of rightOrderPairsIndices ) {
+		sum += pair;
+	}
+
+	return sum;
+}
+
+function answer2( pairs ) {
+
+	var packets = pairs.flat(1);
+
+	packets.push([[2]]);
+	packets.push([[6]]);
+
+	packets.sort(comparePackets);
+	packets.reverse();
+
+	var divider1,
+		divider2;
+
+	var i = 1;
+	for( var packet of packets ) {
+		if( JSON.stringify(packet) === '[[2]]' ) {
+			divider1 = i;
+		} else if( JSON.stringify(packet) === '[[6]]' ) {
+			divider2 = i;
+		}
+		i++;
+	}
+
+	return divider1*divider2;
+}
+
+
+function comparePackets( left, right ) {
+
+	var isCorrectOrder = true;
+
+	if( Number.isInteger(left) && Number.isInteger(right) ) {
+
+		// compare ints
+
+		if( left < right ) {
+			return true;
+		} else if( left > right ) {
+			return false;
+		} else {
+			return undefined;
+		}
+
+	} else if( Array.isArray(left) && Array.isArray(right) ) {
+
+		// compare arrays
+
+		var elementIsCorrectOrder;
+
+		var length = left.length;
+		if( right.length > length ) length = right.length;
+
+		for( var i = 0; i < length; i++ ) {
+			var leftElement = left[i],
+				rightElement = right[i];
+
+			if( leftElement === undefined ) {
+				return true;
+			}
+			if( rightElement === undefined ) {
+				return false;
+			}
+
+			elementIsCorrectOrder = comparePackets( leftElement, rightElement );
+
+			if( elementIsCorrectOrder !== undefined ) {
+				return elementIsCorrectOrder;
+			}
+
+		}
+
+		return undefined;
+
+	} else {
+
+		// convert int to array, then try again
+
+		if( Number.isInteger(left) ) {
+			left = [left];
+		} else if( Number.isInteger(right) ) {
+			right = [right];
+		}
+
+		isCorrectOrder = comparePackets( left, right );
+
+	}
+
+	return isCorrectOrder;
+}
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		input = prepareInput(getInput());
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
