@@ -31,6 +31,7 @@ window.addEventListener('load',function(){
 	document.getElementById('start').addEventListener('click', function(){
 		var input = prepareInput(getInput());
 		output.innerHTML = "Answer 1: "+answer1(input);
+		input = prepareInput(getInput());
 		output.innerHTML += "\nAnswer 2: "+answer2(input);
 	});
 });
