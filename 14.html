@@ -1,0 +1,262 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 14 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	var paths = input.split('\n').map(function(path) {
+		return path.split(' -> ').map(function(points){
+			return points.split(',').map(function(point){
+				return parseInt(point, 10);
+			});
+		});
+	});
+
+	var map = [];
+
+	for( var path of paths ) {
+
+		var lastPoint = false;
+
+		for( var point of path ) {
+
+			var pointX = point[0],
+				pointY = point[1];
+
+			if( lastPoint ) {
+
+				var point1, point2;
+
+				if( pointX == lastPoint[0] ) {
+					// horizontal
+					var x = pointX;
+
+					if( pointY < lastPoint[1] ) {
+						point1 = point;
+						point2 = lastPoint;
+					} else {
+						point1 = lastPoint;
+						point2 = point;
+					}
+
+					for( var y = point1[1]; y <= point2[1]; y++ ) {
+						if( ! map[y] ) map[y] = [];
+						map[y][x] = '#';
+					}
+
+				} else if( pointY == lastPoint[1] ) {
+					// vertical
+					var y = pointY;
+
+					if( pointX < lastPoint[0] ) {
+						point1 = point;
+						point2 = lastPoint;
+					} else {
+						point1 = lastPoint;
+						point2 = point;
+					}
+
+					for( var x = point1[0]; x <= point2[0]; x++ ) {
+						if( ! map[y] ) map[y] = [];
+						map[y][x] = '#';
+					}
+
+				}
+
+			} else {
+				if( ! map[pointY] ) map[pointY] = [];
+				map[pointY][pointX] = '#';
+			}
+
+
+			lastPoint = point;
+
+		}
+
+	}
+
+	return map;
+}
+
+function answer1( map ) {
+
+	var maxY = map.length;
+
+	var sandSpawn = [500,0];
+
+	var count = 0;
+	var spawning = true;
+	while( spawning ) {
+
+		var sandParticle = [sandSpawn[0], sandSpawn[1]];
+		var moving = true;
+
+		while( moving ) {
+
+			var x = sandParticle[0],
+				y = sandParticle[1];
+
+			var newX = x,
+				newY = y+1;
+
+			var nextPosition = checkPosition( newX, newY, map );
+
+			if( nextPosition ) {
+
+				newX -= 1;
+
+				nextPosition = checkPosition( newX, newY, map );
+				if( nextPosition ) {
+
+					newX += 2;
+					nextPosition = checkPosition( newX, newY, map );
+					if( nextPosition ) {
+						if( ! map[y] ) map[y] = [];
+						map[y][x] = 'o';
+
+						moving = false;
+					}
+
+				}
+
+			}
+
+			sandParticle = [newX,newY];
+
+			if( newY > maxY ) {
+				moving = false;
+				spawning = false;
+			}
+
+		}
+
+		count++;
+
+	}
+
+	count--; // because we also count the first sandParticle that moves into the abyss
+
+	return count;
+}
+
+function answer2( map ) {
+
+	var maxY = map.length + 1;
+
+	var sandSpawn = [500,0];
+
+	var count = 0;
+	var spawning = true;
+	while( spawning ) {
+
+		var sandParticle = [sandSpawn[0], sandSpawn[1]];
+		var moving = true;
+
+		while( moving ) {
+
+			var x = sandParticle[0],
+				y = sandParticle[1];
+
+			var newX = x,
+				newY = y+1;
+
+			if( newY == maxY ) {
+				// floor
+				if( ! map[y] ) map[y] = [];
+				map[y][x] = 'o';
+				moving = false;
+			}
+
+			var nextPosition = checkPosition( newX, newY, map );
+
+			if( nextPosition ) {
+
+				newX -= 1;
+
+				nextPosition = checkPosition( newX, newY, map );
+				if( nextPosition ) {
+
+					newX += 2;
+					nextPosition = checkPosition( newX, newY, map );
+					if( nextPosition ) {
+						// particle at rest
+
+						if( x == sandSpawn[0] && y == sandSpawn[1] ) {
+							// particle came at rest at spawn
+							spawning = false;
+							moving = false;
+						}
+
+						if( ! map[y] ) map[y] = [];
+						map[y][x] = 'o';
+
+						moving = false;
+					}
+
+				}
+
+			}
+
+			sandParticle = [newX,newY];
+
+		}
+
+		count++;
+
+	}
+
+	return count;
+}
+
+
+function checkPosition( x, y, map ){
+
+	if( ! map[y] ) return false;
+
+	if( ! map[y][x] ) return false;
+
+	if( map[y][x] == '#' || map[y][x] == 'o' ) return true;
+
+	console.warn('cant check position')
+
+}
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		input = prepareInput(getInput());
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
