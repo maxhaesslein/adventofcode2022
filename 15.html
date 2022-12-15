@@ -1,0 +1,166 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 15 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	var data = input.split('\n').map(function(line){
+
+		line = line.split(':');
+
+		var sensor = line[0].replace('Sensor at ', '').split(',').map(function(el){
+				return parseInt(el.split('=')[1],10);
+			}),
+			beacon = line[1].replace(' closest beacon is at ', '' ).split(',').map(function(el){
+				return parseInt(el.split('=')[1],10);
+			});
+
+		var distance = Math.abs(sensor[0]-beacon[0]) + Math.abs(sensor[1]-beacon[1]);
+
+		return {
+			sensor: sensor,
+			beacon: beacon,
+			distance: distance
+		};
+
+	});
+
+	return data;
+}
+
+function answer1( data ) {
+
+	var testCase = false; // DEBUG
+
+	var map = [],
+		targetLine = 2000000,
+		minX = data[0].sensor[0],
+		maxX = minX;
+
+	if( testCase ) targetLine = 10;
+
+	// position sensors & beacons in map:
+	for( var s of data ) {
+		var sensor = s.sensor,
+			beacon = s.beacon,
+			distance = s.distance;
+
+		if( Math.floor(sensor[0]-distance) < minX ) minX = Math.floor(sensor[0]-distance);
+		else if( Math.ceil(sensor[0]+distance) > maxX ) maxX = Math.ceil(sensor[0]+distance);
+		
+		// place sensor
+		if( ! map[sensor[1]] ) map[sensor[1]] = [];
+		map[sensor[1]][sensor[0]] = 'S';
+
+		// place beacon
+		if( ! map[beacon[1]] ) map[beacon[1]] = [];
+		map[beacon[1]][beacon[0]] = 'B';
+
+	}
+
+
+	var y = targetLine,
+		count = 0;
+	for( var x = minX; x < maxX; x++ ) {
+
+		var position = [x,y];
+
+		for( var s of data ) {
+			var range = s.distance,
+				sensor = s.sensor,
+				distance = Math.abs(sensor[0]-position[0]) + Math.abs(sensor[1]-position[1]);
+
+			if( distance > range ) continue;
+
+
+			// TODO: loop over pixels that this sensor should cover, to skip ahead
+/*
+			console.log(x,y)
+			console.log('  in range', sensor, range, distance)
+*/
+			if( ! map[y] ) map[y] = [];
+
+			if( map[y][x] ) continue; // already scanner or beacon at this position
+
+			map[y][x] = '#';
+			count++;
+
+			break;
+
+		}
+
+	}
+
+
+// DEBUG
+	// print map (with a bit padding for negative values)
+	if( testCase ) {
+		var html = '\n';
+		for( var y = -2; y < map.length; y++ ) {
+			if( ! map[y] ) map[y] = new Array(10);
+			for( var x = minX; x < map[y].length; x++ ) {
+				if( map[y][x] == 'S' ) html += 'S';
+				else if( map[y][x] == 'B' ) html += 'B';
+				else if( map[y][x] == '#' ) html += '#';
+				else html += '.';
+			}
+			while( x < maxX ) {
+				html += '.';
+				x++;
+			}
+			html += '\n';
+		}
+
+		html += '\n\n'+count;
+
+		return html;
+	}
+// DEBUG end
+
+	return count;
+}
+
+function answer2( data ) {
+	return "?";
+}
+
+
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+	if( ! input ) console.warn("please provide an input");
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		input = prepareInput(getInput());
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
