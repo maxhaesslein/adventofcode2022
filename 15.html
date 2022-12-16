@@ -2,6 +2,8 @@
 <title>Day 15 - Advent of Code 2022</title>
 <script type="text/javascript">
 
+var DEBUG = false;
+
 function prepareInput( input ) {
 
 	var data = input.split('\n').map(function(line){
@@ -34,7 +36,7 @@ function answer1( data ) {
 		minX = data[0].sensor[0],
 		maxX = minX;
 
-	//targetLine = 10; // DEBUG
+	if( DEBUG ) targetLine = 10;
 
 	var y = targetLine,
 		count = 0,
@@ -97,7 +99,90 @@ function answer1( data ) {
 }
 
 function answer2( data ) {
-	return "?";
+
+	var minX = 0,
+		minY = 0,
+		maxX = 4000000,
+		maxY = 4000000;
+
+	if( DEBUG ) {
+		maxX = 20;
+		maxY = 20;
+	}
+
+	var distressSignal;
+
+	for( var y = minY; y < maxY; y++ ) {
+
+		var line = [];
+
+		for( var set of data ) {
+			var sensor = set.sensor,
+				beacon = set.beacon,
+				distance = set.distance;
+
+			if( beacon[1] == y && beacon[0] > minX && beacon[0] < maxX ) line[beacon[0]] = 'B';
+			else if( sensor[1] == y && sensor[0] > minX && sensor[0] < maxX ) line[sensor[0]] = 'S';
+
+		}
+
+		for( var x = minX; x < maxX; x++ ) {
+
+			var position = [x,y];
+
+			for( var set of data ) {
+				var range = set.distance,
+					sensor = set.sensor,
+					distance = Math.abs(sensor[0]-position[0]) + Math.abs(sensor[1]-position[1]);
+
+				if( distance > range ) continue;
+
+				var p1 = x,
+					p2 = sensor[0],
+					area = x;
+
+				if( p1 < p2 ) {
+					area = p2 - p1;
+					area *= 2;
+					area += x;
+				}
+
+				x--;
+
+				while( x < area ) {
+					
+					x++;
+
+					if( x >= maxX ) break;
+
+					if( line[x] == "S" || line[x] == "B" ) continue;
+
+					line[x] = '#';
+
+				}
+
+				break;
+
+			}
+
+		}
+
+		for( var i = 0; i < line.length; i++ ) {
+			if( ! line[i] ) {
+				distressSignal = [i, y];
+				break;
+			}
+		}
+
+		if( distressSignal ) break;
+
+	}
+
+	if( ! distressSignal ) return "?";
+
+	var tuningFrequency = distressSignal[0]*4000000+distressSignal[1];
+
+	return tuningFrequency;
 }
 
 
