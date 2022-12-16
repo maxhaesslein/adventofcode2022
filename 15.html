@@ -107,64 +107,36 @@ function answer2( data ) {
 
 	for( var y = minY; y < maxY; y++ ) {
 
-		var line = [];
-
-		for( var set of data ) {
-			var sensor = set.sensor,
-				beacon = set.beacon,
-				distance = set.distance;
-
-			if( beacon[1] == y && beacon[0] > minX && beacon[0] < maxX ) line[beacon[0]] = 'B';
-			else if( sensor[1] == y && sensor[0] > minX && sensor[0] < maxX ) line[sensor[0]] = 'S';
-
-		}
+		if( y%10 === 0 ) console.log("line", y, "/", maxY, "/", y/maxY*100+"%");
 
 		for( var x = minX; x < maxX; x++ ) {
 
-			var position = [x,y];
+			var testX = x;
 
 			for( var set of data ) {
-				var range = set.distance,
-					sensor = set.sensor,
-					distance = Math.abs(sensor[0]-position[0]) + Math.abs(sensor[1]-position[1]);
 
-				if( distance > range ) continue;
+				var sensor = set.sensor,
+					distance = Math.abs(sensor[0]-x) + Math.abs(sensor[1]-y);
 
-				var p1 = x,
-					p2 = sensor[0],
-					area = x;
+				if( distance > set.distance ) continue;
 
-				if( p1 < p2 ) {
-					area = p2 - p1;
+				var area = 0;
+
+				if( x < sensor[0] ) {
+					area = sensor[0] - x;
 					area *= 2;
-					area += x;
 				}
 
-				x--;
-
-				while( x < area ) {
-					
-					x++;
-
-					if( x >= maxX ) break;
-
-					if( line[x] == "S" || line[x] == "B" ) continue;
-
-					line[x] = '#';
-
-				}
+				x += 1+area;
 
 				break;
-
 			}
 
-		}
-
-		for( var i = 0; i < line.length; i++ ) {
-			if( ! line[i] ) {
-				distressSignal = [i, y];
-				break;
+			if( x == testX ) {
+				// we are still at the same x, that means there was nothing blocking this position
+				distressSignal = [x,y]
 			}
+
 		}
 
 		if( distressSignal ) break;
