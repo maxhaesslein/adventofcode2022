@@ -93,53 +93,43 @@ function answer1( data ) {
 
 function answer2( data ) {
 
-	var minX = 0,
+	var distressSignal,
+		minX = 0,
 		minY = 0,
 		maxX = 4000000,
 		maxY = 4000000;
+
 
 	if( DEBUG ) {
 		maxX = 20;
 		maxY = 20;
 	}
 
-	var distressSignal;
+	// distressSignal must be either right outside an intersection of two sensors,
+	// or at the intersetion of one sensor with one of the 4 corners of the test-area.
 
-	for( var y = minY; y < maxY; y++ ) {
+	while( data.length ) {
 
-		if( y%10 === 0 ) console.log("line", y, "/", maxY, "/", y/maxY*100+"%");
+		var set = data.shift();
 
-		for( var x = minX; x < maxX; x++ ) {
+		var sensor = set['sensor'],
+			sensorRange = set['distance'];
 
-			var testX = x;
+		/*
+		// loop over other sensors, and only check intersection points
+		// also, check if inside minX-maxX and minY-maxY
+		for( var subset of data ) {
+			var otherSensor = subset['sensor'],
+				otherRange = subset['distance'];
 
-			for( var set of data ) {
+			var distance = Math.abs(sensor[0]-otherSensor[0]) + Math.abs(sensor[1]-otherSensor[1]);
 
-				var sensor = set.sensor,
-					distance = Math.abs(sensor[0]-x) + Math.abs(sensor[1]-y);
+			if( distance < sensorRange && distance < otherRange ) continue; // skip if sensor is too far away to intersect
 
-				if( distance > set.distance ) continue;
-
-				var area = 0;
-
-				if( x < sensor[0] ) {
-					area = sensor[0] - x;
-					area *= 2;
-				}
-
-				x += 1+area;
-
-				break;
-			}
-
-			if( x == testX ) {
-				// we are still at the same x, that means there was nothing blocking this position
-				distressSignal = [x,y]
-			}
+			console.log(sensor,"intersects with", otherSensor)
 
 		}
-
-		if( distressSignal ) break;
+		*/
 
 	}
 
