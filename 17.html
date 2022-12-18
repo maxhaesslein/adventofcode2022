@@ -37,18 +37,15 @@ function answer1( input ) {
 	var rockNumbers = 2022,
 		chamber = ['#######'];
 
-	//rockNumbers = 38; // DEBUG
-
 	var rocks = input.rocks,
 		jetPattern = input.jetPattern;
-
-	var heights = []; // DEBUG
 
 	for( var rockNumber = 0; rockNumber < rockNumbers; rockNumber++ ) {
 
 		// get next rock
 		var rock = rocks.shift();
 		rocks.push(rock);
+
 
 		rock = rock.split("\n");
 		var rockObj = {
@@ -99,11 +96,7 @@ function answer1( input ) {
 
 		}
 
-		heights.push(chamber.length-1)
-
 	}
-
-	//return heights.join("\n")
 
 	var towerHeight = chamber.length-1;
 
@@ -130,8 +123,6 @@ function checkCollision( chamber, rockObj ) {
 			y++;
 			continue;
 		}
-
-		if( y > 20 ) return true;
 
 		for( var x = rockObj.x; x < rockObj.x+rockObj.width; x++ ) {
 			var chamberEl = chamberLine[x],
