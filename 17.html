@@ -1,0 +1,235 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Day 17 - Advent of Code 2022</title>
+<script type="text/javascript">
+
+function prepareInput( input ) {
+
+	var jetPattern = input.split('');
+
+	var rocks = [
+		'####',
+
+		'.#.\n'+
+		'###\n'+
+		'.#.',
+
+		'..#\n'+
+		'..#\n'+
+		'###',
+
+		'#\n'+
+		'#\n'+
+		'#\n'+
+		'#',
+
+		'##\n'+
+		'##'
+	];
+
+	return {
+		rocks: rocks,
+		jetPattern: jetPattern
+	};
+}
+
+function answer1( input ) {
+
+	var rockNumbers = 2022,
+		chamber = ['#######'];
+
+	//rockNumbers = 10; // DEBUG
+
+	var rocks = input.rocks,
+		jetPattern = input.jetPattern;
+
+	for( var rockNumber = 0; rockNumber < rockNumbers; rockNumber++ ) {
+
+		// get next rock
+		var rock = rocks.shift();
+		rocks.push(rock);
+
+		rock = rock.split("\n");
+		var rockObj = {
+			rock: rock.reverse(),
+			width: rock[0].length,
+			x: 2,
+			y: -4
+		}
+
+		var moving = true;
+		while( moving ) {
+
+			// move rock left or right
+			var jetDirection = jetPattern.shift();
+			jetPattern.push(jetDirection);
+
+
+			if( jetDirection == '<' ) {
+
+				rockObj.x--;
+
+				if( rockObj.y >= 0 && checkCollision( chamber, rockObj ) !== false ) {
+					rockObj.x++;
+				}
+
+				if( rockObj.x < 0 ) rockObj.x = 0;
+
+			} else if( jetDirection == '>' ) {
+
+				rockObj.x++;
+
+				if( rockObj.y >= 0 && checkCollision( chamber, rockObj ) !== false ) {
+					rockObj.x--;
+				}
+	
+				if( rockObj.x > 7-rockObj.width ) rockObj.x = 7-rockObj.width;
+
+			}
+
+			// If a downward movement would have caused a falling rock to move into the floor or an already-fallen rock, the falling rock stops where it is (having landed on something)
+			rockObj.y++;
+			if( rockObj.y >= 0 ) {
+				var collisionAt = checkCollision( chamber, rockObj );
+				if( collisionAt !== false ) {
+					chamber = stopRockInChamber( chamber, rockObj );
+					moving = false;
+				}
+			}
+
+		}
+
+	}
+
+/*
+	var tower = "";
+	for( var line of chamber.reverse() ) {
+		tower += "\n"+line;
+	}
+	tower += "\n\n|....#..|\n|....#..|\n|....##.|\n|##..##.|\n|######.|\n|.###...|\n|..#....|\n|.####..|\n|....##.|\n|....##.|\n|....#..|\n|..#.#..|\n|..#.#..|\n|#####..|\n|..###..|\n|...#...|\n|..####.|\n+-------+\n"
+
+	return "\n"+tower+"\n";
+*/
+
+	var towerHeight = chamber.length-1;
+
+	towerHeight += ' / 3068';
+
+	return towerHeight;
+}
+
+function answer2( input ) {
+	return "?";
+}
+
+
+function checkCollision( chamber, rockObj ) {
+	chamber = new Array(...chamber); // clone
+
+	chamber.reverse();
+	chamber.splice(rockObj.y+1);
+
+
+	var y = 0;
+	for( var chamberLine of chamber ) {
+
+
+		var rockLine = rockObj.rock[rockObj.y-y];
+
+
+		if ( ! rockLine ) {
+			y++;
+			continue;
+		}
+
+		if( y > 20 ) {
+			return true;
+		}
+
+		for( var x = rockObj.x; x < rockObj.x+rockObj.width; x++ ) {
+			var chamberEl = chamberLine[x],
+				rockEl = rockLine[x-rockObj.x];
+
+
+			if( chamberEl == "#" && rockEl == "#" ) {
+				return y;
+			}
+		}
+
+		y++;
+	}
+
+	return false;
+}
+
+function stopRockInChamber( chamber, rockObj ) {
+	chamber = new Array(...chamber); // clone
+
+	// merge lines
+	for( var y = 0; y < rockObj.y; y++ ) {
+
+		if( rockObj.y - y > rockObj.rock.length ) continue;
+
+		var rockLine = rockObj.rock.shift(),
+			chamberLineNumber = chamber.length-1-y,
+			chamberLine = chamber[chamberLineNumber],
+			newLine = "";
+
+
+		for( var x = 0; x < 7; x++ ) {
+			if( x >= rockObj.x && x < rockObj.x+rockObj.width ) {
+				newLine += rockLine[x-rockObj.x];
+			} else {
+				newLine += chamberLine[x];
+			}
+		}
+
+		chamber[chamberLineNumber] = newLine;
+
+	}
+
+	// append rest of lines
+	for( var line of rockObj.rock ) {
+		line = '.'.repeat(rockObj.x)+line+'.'.repeat(7-rockObj.width-rockObj.x);
+		chamber.push(line);
+	}
+
+	return chamber;
+}
+
+
+function getInput() {
+	var textArea = document.getElementById('input');
+	var input = textArea.value;
+
+	input = input.trim();
+
+
+	return input;
+}
+window.addEventListener('load',function(){
+	var output = document.getElementById('output');
+	document.getElementById('start').addEventListener('click', function(){
+		var input = prepareInput(getInput());
+		output.innerHTML = "Answer 1: "+answer1(input);
+		input = prepareInput(getInput());
+		output.innerHTML += "\nAnswer 2: "+answer2(input);
+	});
+});
+</script>
+<style>
+textarea {
+	width: 500px;
+	height: 500px;
+	display: block;
+}
+pre {
+	background: #eee;
+	min-height: 2em;
+}
+</style>
+</head>
+<body>
+<pre id="output"></pre>
+<textarea id="input"></textarea>
+<button id="start">start</button>
+</body></html>
